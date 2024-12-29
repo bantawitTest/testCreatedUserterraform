@@ -39,7 +39,6 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: |
-          set -e
           terraform apply -auto-approve
           echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
           
@@ -64,9 +63,10 @@ jobs:
       # Step 6: Generate Credentials File
       - name: Generate Credentials File
         run: |
-          echo "Access Key ID: ${{ env.ACCESS_KEY_ID }}" > ${{ env.USER_NAME }}_credentials.txt
-          echo "Secret Access Key: ${{ env.ACCESS_KEY_SECRET }}" >> ${{ env.USER_NAME }}_credentials.txt
-          echo "User Name: ${{ env.USER_NAME }}" >> ${{ env.USER_NAME }}_credentials.txt
+          # Validate the environment variables are set
+          echo "Access Key ID: ${{ env.ACCESS_KEY_ID }}" > "${{ env.USER_NAME }}_credentials.txt"
+          echo "Secret Access Key: ${{ env.ACCESS_KEY_SECRET }}" >> "${{ env.USER_NAME }}_credentials.txt"
+          echo "User Name: ${{ env.USER_NAME }}" >> "${{ env.USER_NAME }}_credentials.txt"
 
       # Step 7: Upload Credentials
       - name: Upload Credentials
