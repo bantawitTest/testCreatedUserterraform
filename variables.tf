@@ -15,6 +15,7 @@ variable "account_id" {
 }
 
 variable "ip_addresses" {
-  description = "The list of IP addresses for permissions boundary"
-  type        = string
+  description = "List of IP addresses for permissions boundary"
+  type        = list(string)  # Aquí definimos el tipo como lista de cadenas
+  default     = []  # Default vacío, puedes eliminarlo si no quieres un valor predeterminado
 }
