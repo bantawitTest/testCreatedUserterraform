@@ -1,9 +1,12 @@
 name: Terraform Plan and Apply
 
 on:
-  push:
+  pull_request:
+    paths:
+      - terraform.tfvars  # Ejecutar solo si hay cambios en terraform.tfvars
     branches:
-      - main
+      - main  # Solo para pull requests dirigidos a la rama main
+
 permissions:
   id-token: write
   contents: read
@@ -17,13 +20,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Install Terraform
+      # Step 2: Check if terraform.tfvars has changed
+      - name: Check if terraform.tfvars has changed
+        id: check_tfvars
+        run: |
+          git fetch origin main
+          if ! git diff --quiet origin/main -- terraform.tfvars; then
+            echo "terraform.tfvars has changed, proceeding with the workflow"
+          else
+            echo "No changes detected in terraform.tfvars, skipping workflow."
+            exit 0  # Skip the workflow if no changes in terraform.tfvars
+          fi
+
+      # Step 3: Install Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: '1.5.0'  # Change to the version of Terraform you need
 
-      # Step 3: Set up AWS OIDC credentials (Assuming AWS OIDC is configured with GitHub)
+      # Step 4: Set up AWS OIDC credentials (Assuming AWS OIDC is configured with GitHub)
       - name: Set up AWS OIDC credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -31,11 +46,11 @@ jobs:
           aws-region: us-east-1
           role-session-name: GitHubActions
 
-      # Step 4: Terraform Init
+      # Step 5: Terraform Init
       - name: Terraform Init
         run: terraform init
 
-      # Step 5: Terraform Apply and Capture Output
+      # Step 6: Terraform Apply and Capture Output
       - name: Terraform Apply
         id: apply
         run: |
@@ -59,12 +74,12 @@ jobs:
           echo "" >> user_info.txt
           echo "Un saludo." >> user_info.txt
 
-
-      # Step 6: Upload the file as an artifact
+      # Step 7: Upload the file as an artifact
       - name: Upload User Info as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: user-info
           path: user_info.txt
           retention-days: 1
+
 
