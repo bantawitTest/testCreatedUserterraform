@@ -1,53 +1,69 @@
-# 1. Check if the Permissions Boundary Policy already exists
-data "aws_iam_policy" "existing_permissions_boundary_policy" {
-  name = "${var.user_name}_CustomIPWhitelist"
-}
+name: Terraform Plan and Apply
 
-# 2. Create the Permissions Boundary Policy only if it doesn't exist
-resource "aws_iam_policy" "permissions_boundary_policy" {
-  count       = length(lookup(data.aws_iam_policy.existing_permissions_boundary_policy, "id", [])) == 0 ? 1 : 0
-  name        = "${var.user_name}_CustomIPWhitelist"
-  description = "Permissions Boundary for IP Whitelist"
-  policy      = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = "*"
-        Resource = "*"
-        Condition = {
-          "ForAnyValue:IpAddress" = {
-            "aws:SourceIp" = var.ip_addresses
-          }
-        }
-      }
-    ]
-  })
-}
+on:
+  push:
+    branches:
+      - main
+permissions:
+  id-token: write
+  contents: read
 
-# 3. Create the IAM User (now including permissions_boundary)
-resource "aws_iam_user" "new_user" {
-  name                 = var.user_name
-  permissions_boundary = try(data.aws_iam_policy.existing_permissions_boundary_policy.arn, aws_iam_policy.permissions_boundary_policy[0].arn)
-}
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
 
-# 4. Create Inline Policy for the User
-resource "aws_iam_user_policy" "user_policy" {
-  user   = aws_iam_user.new_user.name
-  name   = "${var.user_name}_policy"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action   = "sts:AssumeRole"
-        Effect   = "Allow"
-        Resource = "arn:aws:iam::${var.account_id}:role/${var.role_name}"
-      }
-    ]
-  })
-}
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-# 5. Create Access Keys for the User
-resource "aws_iam_access_key" "user_access_key" {
-  user = aws_iam_user.new_user.name
-}
+      # Step 2: Install Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: '1.5.0'  # Change to the version of Terraform you need
+
+      # Step 3: Set up AWS OIDC credentials
+      - name: Set up AWS OIDC credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::918691367691:role/GithubActionWorkflowOICD
+          aws-region: us-east-1
+          role-session-name: GitHubActions
+
+      # Step 4: Terraform Init
+      - name: Terraform Init
+        run: terraform init
+
+      # Step 5: Terraform Apply and Capture Output
+      - name: Terraform Apply
+        id: apply
+        run: |
+          terraform apply -auto-approve
+          echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
+          
+          # Capture the Terraform output values into environment variables
+          USER_NAME=$(terraform output -raw user_name)
+          ACCESS_KEY_ID=$(terraform output -raw access_key_id)
+          ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
+
+          # Debugging output to ensure the variables are captured correctly
+          echo "Captured USER_NAME: $USER_NAME"
+          echo "Captured ACCESS_KEY_ID: $ACCESS_KEY_ID"
+          echo "Captured ACCESS_KEY_SECRET: $ACCESS_KEY_SECRET"
+
+          # Set the captured values as GitHub Actions environment variables
+          echo "USER_NAME=$USER_NAME" >> $GITHUB_ENV
+          echo "ACCESS_KEY_ID=$ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "ACCESS_KEY_SECRET=$ACCESS_KEY_SECRET" >> $GITHUB_ENV
+
+          # Verify if the environment variables are set
+          cat $GITHUB_ENV
+
+      # Step 6: Display values from environment variables
+      - name: Display User Information
+        run: |
+          echo "USER_NAME: $USER_NAME"
+          echo "ACCESS_KEY_ID: $ACCESS_KEY_ID"
+          echo "ACCESS_KEY_SECRET: $ACCESS_KEY_SECRET"
+          
