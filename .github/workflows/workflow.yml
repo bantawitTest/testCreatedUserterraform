@@ -1,7 +1,7 @@
 name: Terraform Plan and Apply
 
 on:
-  workflow_dispatch:  # Permite que el flujo sea ejecutado manualmente desde GitHub
+  workflow_dispatch:  # Permite ejecución manual
 
 permissions:
   id-token: write
@@ -41,15 +41,29 @@ jobs:
           terraform apply -auto-approve
           echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
 
-          # Capturar salidas de Terraform
-          USER_NAME=$(terraform output -raw user_name)
-          ACCESS_KEY_ID=$(terraform output -raw access_key_id)
-          ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
+          # Capturar las salidas de Terraform
+          USER_NAME=$(terraform output -raw user_name 2>/dev/null || echo "ERROR")
+          ACCESS_KEY_ID=$(terraform output -raw access_key_id 2>/dev/null || echo "ERROR")
+          ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret 2>/dev/null || echo "ERROR")
 
-          # Guardar las variables en $GITHUB_ENV
-          echo "USER_NAME=${USER_NAME}" >> $GITHUB_ENV
-          echo "ACCESS_KEY_ID=${ACCESS_KEY_ID}" >> $GITHUB_ENV
-          echo "ACCESS_KEY_SECRET=${ACCESS_KEY_SECRET}" >> $GITHUB_ENV
+          # Validar las variables y evitar errores al escribir en $GITHUB_ENV
+          if [[ $USER_NAME == "ERROR" || $ACCESS_KEY_ID == "ERROR" || $ACCESS_KEY_SECRET == "ERROR" ]]; then
+            echo "Error: Unable to fetch Terraform outputs. Please check the output values."
+            exit 1
+          fi
+
+          # Escribir valores en $GITHUB_ENV usando formato seguro
+          echo "USER_NAME<<EOF" >> $GITHUB_ENV
+          echo "$USER_NAME" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "ACCESS_KEY_ID<<EOF" >> $GITHUB_ENV
+          echo "$ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "ACCESS_KEY_SECRET<<EOF" >> $GITHUB_ENV
+          echo "$ACCESS_KEY_SECRET" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       # Step 6: Validar que las variables están disponibles
       - name: Validar Variables de Entorno
