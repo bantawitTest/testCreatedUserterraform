@@ -35,35 +35,22 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      # Step 5: Terraform Apply and Capture Output
+      # Step 5: Terraform Apply
       - name: Terraform Apply
         id: apply
         run: |
           terraform apply -auto-approve
           echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
-          
-          # Capture the Terraform output values
+
+      # Step 6: Capture the Terraform output values and display them in the console
+      - name: Capture and Display Terraform Outputs
+        run: |
+          # Capture Terraform outputs
           USER_NAME=$(terraform output -raw user_name)
           ACCESS_KEY_ID=$(terraform output -raw access_key_id)
           ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
 
-          # Display the sensitive values in the console (DO NOT save them as env variables or outputs)
+          # Display the sensitive values in the console
           echo "User Name: $USER_NAME"
           echo "Access Key ID: $ACCESS_KEY_ID"
           echo "Access Key Secret: $ACCESS_KEY_SECRET"
-
-      # Optional: Step 6 for displaying or using the values in subsequent steps (if needed)
-      - name: Display User Information
-        run: |
-          echo "User Name: ${{ steps.apply.outputs.user_name }}"
-          echo "Access Key ID: ${{ steps.apply.outputs.access_key_id }}"
-          echo "Access Key Secret: ${{ steps.apply.outputs.access_key_secret }}"
-
-      # Optional: Step 7 for uploading credentials or additional tasks
-      # - name: Upload Credentials
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: credentials
-      #     path: path/to/credentials/file
-
-
