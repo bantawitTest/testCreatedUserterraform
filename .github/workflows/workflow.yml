@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       # Step 2: Install Terraform
-      - name: Set up Terraform
+        - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: '1.5.0'  # Cambia a la versión de Terraform que necesites
@@ -42,7 +42,7 @@ jobs:
           terraform apply -auto-approve
           echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
           
-          # Capture the Terraform output values into environment variables
+          # Capture the Terraform output values and write them to environment variables
           USER_NAME=$(terraform output -raw user_name)
           ACCESS_KEY_ID=$(terraform output -raw access_key_id)
           ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
@@ -52,10 +52,14 @@ jobs:
           echo "Captured ACCESS_KEY_ID: $ACCESS_KEY_ID"
           echo "Captured ACCESS_KEY_SECRET: $ACCESS_KEY_SECRET"
 
-          # Set the captured values as GitHub Actions environment variables
+          # Use GitHub's environment file to set the variables
           echo "USER_NAME=$USER_NAME" >> $GITHUB_ENV
           echo "ACCESS_KEY_ID=$ACCESS_KEY_ID" >> $GITHUB_ENV
           echo "ACCESS_KEY_SECRET=$ACCESS_KEY_SECRET" >> $GITHUB_ENV
-          
-          # Check if the variables were successfully written to GitHub Actions environment
-          cat $GITHUB_ENV
+
+      # Step 6: Check if the environment variables were correctly set
+      - name: Verify environment variables
+        run: |
+          echo "USER_NAME=${{ env.USER_NAME }}"
+          echo "ACCESS_KEY_ID=${{ env.ACCESS_KEY_ID }}"
+          echo "ACCESS_KEY_SECRET=${{ env.ACCESS_KEY_SECRET }}"
