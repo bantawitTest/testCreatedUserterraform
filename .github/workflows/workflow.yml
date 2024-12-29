@@ -66,3 +66,4 @@ jobs:
         with:
           name: user-info
           path: user_info.txt
+          retention-days: 1
