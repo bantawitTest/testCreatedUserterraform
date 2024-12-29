@@ -42,12 +42,20 @@ jobs:
           terraform apply -auto-approve
           echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
           
-          # Capture outputs
+          # Debugging: Check if terraform is accessible
+          which terraform
+
+          # Capture outputs from Terraform
           USER_NAME=$(terraform output -raw user_name)
           ACCESS_KEY_ID=$(terraform output -raw access_key_id)
           ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
 
-          # Append environment variables using proper multiline syntax
+          # Validate outputs
+          echo "Captured USER_NAME: $USER_NAME"
+          echo "Captured ACCESS_KEY_ID: $ACCESS_KEY_ID"
+          echo "Captured ACCESS_KEY_SECRET: <sensitive>"
+
+          # Save outputs to environment variables
           echo "USER_NAME<<EOF" >> $GITHUB_ENV
           echo "$USER_NAME" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -60,15 +68,21 @@ jobs:
           echo "$ACCESS_KEY_SECRET" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      # Step 6: Generate Credentials File
+      # Step 6: Debug Environment Variables
+      - name: Debug Environment Variables
+        run: |
+          echo "USER_NAME: ${{ env.USER_NAME }}"
+          echo "ACCESS_KEY_ID: ${{ env.ACCESS_KEY_ID }}"
+          echo "ACCESS_KEY_SECRET: <sensitive>"
+
+      # Step 7: Generate Credentials File
       - name: Generate Credentials File
         run: |
-          # Validate the environment variables are set
           echo "Access Key ID: ${{ env.ACCESS_KEY_ID }}" > "${{ env.USER_NAME }}_credentials.txt"
           echo "Secret Access Key: ${{ env.ACCESS_KEY_SECRET }}" >> "${{ env.USER_NAME }}_credentials.txt"
           echo "User Name: ${{ env.USER_NAME }}" >> "${{ env.USER_NAME }}_credentials.txt"
 
-      # Step 7: Upload Credentials
+      # Step 8: Upload Credentials
       - name: Upload Credentials
         uses: actions/upload-artifact@v3
         with:
