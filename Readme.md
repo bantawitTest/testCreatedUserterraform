@@ -15,6 +15,7 @@ Este módulo realiza las siguientes acciones:
 1. **Terraform:** Debes tener instalado Terraform en tu máquina o entorno de CI/CD.
 2. **Cuenta AWS:** Este módulo necesita acceso a una cuenta AWS con permisos suficientes para crear usuarios, políticas y claves de acceso.
 3. **Acceso de OIDC para GitHub Actions (si usas CI/CD):** Debes configurar el acceso OIDC de AWS con GitHub para autenticarte sin necesidad de claves de acceso estáticas.
+   Aqui es el articulo donde se explica exactamente como podemos configurar el acceso OIDC de AWS con GitHub: https://mahendranp.medium.com/configure-github-openid-connect-oidc-provider-in-aws-b7af1bca97dd
 
 ## Estructura del Módulo
 
