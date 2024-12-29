@@ -42,7 +42,6 @@ jobs:
           terraform apply -auto-approve
           USER_NAME=$(terraform output -raw user_name)
           echo "USER_NAME=${USER_NAME}" >> $GITHUB_ENV
-          echo "::set-output name=USER_NAME::${USER_NAME}"
 
       # Step 6: Generate credentials file
       - name: Generate Credentials File
@@ -55,6 +54,6 @@ jobs:
       - name: Upload Credentials
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.apply.outputs.USER_NAME }}-credentials
+          name: ${{ env.USER_NAME }}-credentials
           path: "${{ env.USER_NAME }}_credentials.txt"
           retention-days: 1
