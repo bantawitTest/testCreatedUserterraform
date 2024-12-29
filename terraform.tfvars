@@ -1,4 +1,4 @@
-user_name    = "new_user_name"
+user_name    = "User_with_Oidc"
 role_name    = "AccountAutomationPro"
-account_id   = "992382844242"
-ip_addresses = "\"X.X.X.X\",\"Y.Y.Y.Y/Y\""  # Replace with actual IP addresses
+account_id   = "918691367691"
+ip_addresses = ["34.50.0.0/16", "52.100.0.0/16"]  # Replace with actual IP addresses
