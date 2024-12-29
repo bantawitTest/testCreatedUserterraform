@@ -42,10 +42,10 @@ jobs:
           terraform apply -auto-approve
           echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
           
-          # Capturar y procesar cada salida con grep/sed
-          USER_NAME=$(terraform output user_name | grep -oP '(?<=value = ).*')
-          ACCESS_KEY_ID=$(terraform output access_key_id | grep -oP '(?<=value = ).*')
-          ACCESS_KEY_SECRET=$(terraform output access_key_secret | grep -oP '(?<=value = ).*')
+          # Capture the Terraform output values and store them in environment variables
+          USER_NAME=$(terraform output -raw user_name)
+          ACCESS_KEY_ID=$(terraform output -raw access_key_id)
+          ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
           
           # Crear el archivo con los valores extraídos
           echo "Buenas tardes," > user_info.txt
