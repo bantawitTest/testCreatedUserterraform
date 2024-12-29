@@ -59,9 +59,8 @@ jobs:
           name: user-info
           path: user_info.txt
 
-      # Optional: Step 7 for downloading the artifact manually (you can download it from the GitHub Actions UI)
-      # - name: Download user info file
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: user-info
-      #     path: ./downloaded_files
+      # Step 7: Provide download link to the artifact
+      - name: Provide download link to artifact
+        run: |
+          echo "Artifact 'user-info' has been uploaded. You can download it from the following URL:"
+          echo "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/$(echo ${{ steps.upload.outputs.artifact-id }})"
