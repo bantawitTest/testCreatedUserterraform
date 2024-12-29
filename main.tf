@@ -1,6 +1,3 @@
-provider "aws" {
-  region = "us-east-1"  # Change the region as needed
-}
 
 # 1. Create the Permissions Boundary Policy
 resource "aws_iam_policy" "permissions_boundary_policy" {
