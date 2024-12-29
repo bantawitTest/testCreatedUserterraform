@@ -1,5 +1,11 @@
-# 1. Create the Permissions Boundary Policy
+# Step 1: Check if the Permissions Boundary Policy already exists
+data "aws_iam_policy" "existing_permissions_boundary_policy" {
+  name = "${var.user_name}_CustomIPWhitelist"
+}
+
+# Step 2: Create the Permissions Boundary Policy only if it doesn't exist
 resource "aws_iam_policy" "permissions_boundary_policy" {
+  count       = length(data.aws_iam_policy.existing_permissions_boundary_policy.id) == 0 ? 1 : 0
   name        = "${var.user_name}_CustomIPWhitelist"
   description = "Permissions Boundary for IP Whitelist"
   policy      = jsonencode({
@@ -19,13 +25,13 @@ resource "aws_iam_policy" "permissions_boundary_policy" {
   })
 }
 
-# 2. Create the IAM User (now including permissions_boundary)
+# Step 3: Create the IAM User (now including permissions_boundary)
 resource "aws_iam_user" "new_user" {
   name                 = var.user_name
-  permissions_boundary = aws_iam_policy.permissions_boundary_policy.arn
+  permissions_boundary = try(data.aws_iam_policy.existing_permissions_boundary_policy.arn, aws_iam_policy.permissions_boundary_policy[0].arn)
 }
 
-# 3. Create Inline Policy for the User
+# Step 4: Create Inline Policy for the User
 resource "aws_iam_user_policy" "user_policy" {
   user   = aws_iam_user.new_user.name
   name   = "${var.user_name}_policy"
@@ -41,7 +47,7 @@ resource "aws_iam_user_policy" "user_policy" {
   })
 }
 
-# 4. Create Access Keys for the User
+# Step 5: Create Access Keys for the User
 resource "aws_iam_access_key" "user_access_key" {
   user = aws_iam_user.new_user.name
 }
