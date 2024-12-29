@@ -47,12 +47,12 @@ jobs:
           ACCESS_KEY_ID=$(terraform output -raw access_key_id)
           ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
 
-          # Set Terraform output values as job outputs
-          echo "user_name=$USER_NAME" >> $GITHUB_ENV
-          echo "access_key_id=$ACCESS_KEY_ID" >> $GITHUB_ENV
-          echo "access_key_secret=$ACCESS_KEY_SECRET" >> $GITHUB_ENV
+          # Set Terraform output values as environment variables
+          echo "USER_NAME=$USER_NAME" >> $GITHUB_ENV
+          echo "ACCESS_KEY_ID=$ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "ACCESS_KEY_SECRET=$ACCESS_KEY_SECRET" >> $GITHUB_ENV
 
-          # Set these values as job outputs for later steps
+          # Set these values as job outputs for later steps (write to the new $GITHUB_OUTPUT)
           echo "user_name=$USER_NAME" >> $GITHUB_OUTPUT
           echo "access_key_id=$ACCESS_KEY_ID" >> $GITHUB_OUTPUT
           echo "access_key_secret=$ACCESS_KEY_SECRET" >> $GITHUB_OUTPUT
