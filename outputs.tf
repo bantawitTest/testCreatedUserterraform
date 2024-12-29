@@ -11,4 +11,5 @@ output "access_key_id" {
 output "access_key_secret" {
   description = "The IAM Access Key Secret for the new user"
   value       = aws_iam_access_key.user_access_key.secret
+  sensitive   = true  # Marca como sensible
 }
