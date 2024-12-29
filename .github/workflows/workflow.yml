@@ -42,7 +42,7 @@ jobs:
           terraform apply -auto-approve
           echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
           
-          # Capture the Terraform output values
+          # Capture the Terraform output values and store them in environment variables
           USER_NAME=$(terraform output -raw user_name)
           ACCESS_KEY_ID=$(terraform output -raw access_key_id)
           ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
@@ -60,14 +60,8 @@ jobs:
           echo "Un saludo." >> user_info.txt
 
       # Step 6: Upload the file as an artifact
-      - name: Upload user info file as artifact
+      - name: Upload User Info as Artifact
         uses: actions/upload-artifact@v3
         with:
           name: user-info
           path: user_info.txt
-
-      # Step 7: Provide download link to the artifact
-      - name: Provide download link to artifact
-        run: |
-          echo "Artifact 'user-info' has been uploaded. You can download it from the following URL:"
-          echo "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/$(echo ${{ steps.upload.outputs.artifact-id }})"
