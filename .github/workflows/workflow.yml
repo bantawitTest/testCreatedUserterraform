@@ -1,0 +1,29 @@
+name: Terraform Plan and Apply
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 1: Set up AWS credentials using OIDC
+      - name: Set up AWS OIDC credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::918691367691:role/GithubActionAuthflow
+          aws-region: us-east-1
+          role-session-name: GitHubActions
+
+      # Step 2: Terraform plan and apply
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
