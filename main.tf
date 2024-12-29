@@ -55,15 +55,3 @@ resource "aws_iam_access_key" "user_access_key" {
   user = aws_iam_user.new_user.name
 }
 
-# 6. Output the IAM User and Access Key Details
-output "user_name" {
-  value = aws_iam_user.new_user.name
-}
-
-output "access_key_id" {
-  value = aws_iam_access_key.user_access_key.id
-}
-
-output "access_key_secret" {
-  value = aws_iam_access_key.user_access_key.secret
-}
