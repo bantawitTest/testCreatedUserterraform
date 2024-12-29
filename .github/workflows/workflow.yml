@@ -52,7 +52,7 @@ jobs:
           echo "Access Key ID: $ACCESS_KEY_ID"
           echo "Access Key Secret: $ACCESS_KEY_SECRET"
 
-      # Step 6: Use the values in a subsequent step
+      # Optional: Step 6 for displaying or using the values in subsequent steps (if needed)
       - name: Display User Information
         run: |
           echo "User Name: ${{ steps.apply.outputs.user_name }}"
@@ -65,4 +65,5 @@ jobs:
       #   with:
       #     name: credentials
       #     path: path/to/credentials/file
+
 
