@@ -67,3 +67,21 @@ jobs:
           name: user-info
           path: user_info.txt
           retention-days: 1
+
+          # Step 7: Reset variables.tfvars with empty values
+      - name: Reset variables.tfvars
+        run: |
+          echo "user_name    = \"\"" > variables.tfvars
+          echo "role_name    = \"\"" >> variables.tfvars
+          echo "account_id   = \"\"" >> variables.tfvars
+          echo "ip_addresses = []" >> variables.tfvars
+          
+          # Step 8: Commit and push the updated variables.tfvars
+          - name: Commit and push updated variables.tfvars
+            uses: EndBug/add-and-commit@v7
+            with:
+              author_name: 'GitHub Actions'
+              author_email: 'actions@github.com'
+              message: 'Reset variables.tfvars to empty values'
+
+
