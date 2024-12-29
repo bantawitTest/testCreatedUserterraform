@@ -21,7 +21,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: '1.5.0'  # Cambia a la versión de Terraform que necesites
+          terraform_version: '1.5.0'  # Change to the version of Terraform you need
 
       # Step 3: Set up AWS OIDC credentials
       - name: Set up AWS OIDC credentials
@@ -56,6 +56,14 @@ jobs:
           echo "USER_NAME=$USER_NAME" >> $GITHUB_ENV
           echo "ACCESS_KEY_ID=$ACCESS_KEY_ID" >> $GITHUB_ENV
           echo "ACCESS_KEY_SECRET=$ACCESS_KEY_SECRET" >> $GITHUB_ENV
-          
-          # Check if the variables were successfully written to GitHub Actions environment
+
+          # Verify if the environment variables are set
           cat $GITHUB_ENV
+
+      # Step 6: Display values from environment variables
+      - name: Display User Information
+        run: |
+          echo "USER_NAME: $USER_NAME"
+          echo "ACCESS_KEY_ID: $ACCESS_KEY_ID"
+          echo "ACCESS_KEY_SECRET: $ACCESS_KEY_SECRET"
+          
