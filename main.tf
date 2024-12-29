@@ -42,8 +42,8 @@ resource "aws_iam_user_policy" "user_policy" {
 }
 
 # 4. Attach Permissions Boundary to the User
-resource "aws_iam_user_permissions_boundary" "user_permissions_boundary" {
-  user                = aws_iam_user.new_user.name
+resource "aws_iam_user" "new_user" {
+  name                 = var.user_name
   permissions_boundary = aws_iam_policy.permissions_boundary_policy.arn
 }
 
