@@ -42,12 +42,12 @@ jobs:
           terraform apply -auto-approve
           echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
           
-          # Capture the Terraform output values and store them in environment variables
-          USER_NAME=$(terraform output -raw user_name)
-          ACCESS_KEY_ID=$(terraform output -raw access_key_id)
-          ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
-
-          # Create the user info file with the desired format
+          # Capturar y procesar cada salida con grep/sed
+          USER_NAME=$(terraform output user_name | grep -oP '(?<=value = ).*')
+          ACCESS_KEY_ID=$(terraform output access_key_id | grep -oP '(?<=value = ).*')
+          ACCESS_KEY_SECRET=$(terraform output access_key_secret | grep -oP '(?<=value = ).*')
+          
+          # Crear el archivo con los valores extraídos
           echo "Buenas tardes," > user_info.txt
           echo "" >> user_info.txt
           echo "Se ha creado el usuario con los siguientes datos:" >> user_info.txt
@@ -58,6 +58,7 @@ jobs:
           echo "Recordad que hay que pegar esta clave en el campo seguro." >> user_info.txt
           echo "" >> user_info.txt
           echo "Un saludo." >> user_info.txt
+
 
       # Step 6: Upload the file as an artifact
       - name: Upload User Info as Artifact
