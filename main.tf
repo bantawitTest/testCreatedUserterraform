@@ -5,7 +5,7 @@ data "aws_iam_policy" "existing_permissions_boundary_policy" {
 
 # Step 2: Create the Permissions Boundary Policy only if it doesn't exist
 resource "aws_iam_policy" "permissions_boundary_policy" {
-  count       = length(data.aws_iam_policy.existing_permissions_boundary_policy.id) == 0 ? 1 : 0
+  count       = length(try(data.aws_iam_policy.existing_permissions_boundary_policy.id, [])) == 0 ? 1 : 0
   name        = "${var.user_name}_CustomIPWhitelist"
   description = "Permissions Boundary for IP Whitelist"
   policy      = jsonencode({
@@ -24,6 +24,7 @@ resource "aws_iam_policy" "permissions_boundary_policy" {
     ]
   })
 }
+
 
 # Step 3: Create the IAM User (now including permissions_boundary)
 resource "aws_iam_user" "new_user" {
