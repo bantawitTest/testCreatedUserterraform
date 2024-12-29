@@ -47,21 +47,21 @@ jobs:
           ACCESS_KEY_ID=$(terraform output -raw access_key_id)
           ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
 
-          # Display the sensitive values in the console (DO NOT save them as env variables or outputs)
-          echo "User Name: $USER_NAME"
-          echo "Access Key ID: $ACCESS_KEY_ID"
-          echo "Access Key Secret: $ACCESS_KEY_SECRET"
+          # Create a file to store the user information
+          echo "User Name: $USER_NAME" > user_info.txt
+          echo "Access Key ID: $ACCESS_KEY_ID" >> user_info.txt
+          echo "Access Key Secret: $ACCESS_KEY_SECRET" >> user_info.txt
 
-      # Step 6: Use the values in a subsequent step (example)
-      - name: Display User Information
-        run: |
-          echo "User Name: ${{ steps.apply.outputs.user_name }}"
-          echo "Access Key ID: ${{ steps.apply.outputs.access_key_id }}"
-          echo "Access Key Secret: ${{ steps.apply.outputs.access_key_secret }}"
+      # Step 6: Upload the file as an artifact
+      - name: Upload user info file as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: user-info
+          path: user_info.txt
 
-      # Optional: Step 7 for uploading credentials or additional tasks
-      # - name: Upload Credentials
-      #   uses: actions/upload-artifact@v3
+      # Optional: Step 7 for downloading the artifact manually (you can download it from the GitHub Actions UI)
+      # - name: Download user info file
+      #   uses: actions/download-artifact@v3
       #   with:
-      #     name: credentials
-      #     path: path/to/credentials/file
+      #     name: user-info
+      #     path: ./downloaded_files
