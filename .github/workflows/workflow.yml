@@ -7,7 +7,6 @@ on:
 permissions:
   id-token: write
   contents: read
-  secrets: write  # Allow access to write secrets to GitHub
 
 jobs:
   terraform:
@@ -22,9 +21,9 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: '1.5.0'
+          terraform_version: '1.5.0'  # Change to the version of Terraform you need
 
-      # Step 3: Set up AWS OIDC credentials
+      # Step 3: Set up AWS OIDC credentials (Assuming AWS OIDC is configured with GitHub)
       - name: Set up AWS OIDC credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -48,26 +47,10 @@ jobs:
           ACCESS_KEY_ID=$(terraform output -raw access_key_id)
           ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
 
-          # Store the Terraform generated keys as GitHub Secrets using the GitHub API
-          echo "Storing AWS access keys as GitHub Secrets..."
-
-          # GitHub API URL for Secrets
-          GITHUB_API_URL="https://api.github.com/repos/${{ github.repository }}/actions/secrets"
-          
-          # Encode the Access Key ID and Secret Access Key (required for GitHub API)
-          ACCESS_KEY_ID_ENCODED=$(echo -n "$ACCESS_KEY_ID" | base64)
-          ACCESS_KEY_SECRET_ENCODED=$(echo -n "$ACCESS_KEY_SECRET" | base64)
-
-          # Store the secrets in GitHub using GitHub's REST API
-          curl -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -d "{\"encrypted_value\":\"$ACCESS_KEY_ID_ENCODED\", \"key_id\":\"$KEY_ID\"}" \
-            "$GITHUB_API_URL/AWS_ACCESS_KEY_ID"
-          
-          curl -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -d "{\"encrypted_value\":\"$ACCESS_KEY_SECRET_ENCODED\", \"key_id\":\"$KEY_ID\"}" \
-            "$GITHUB_API_URL/AWS_SECRET_ACCESS_KEY"
-          
-          echo "AWS keys successfully stored in GitHub Secrets"
+          # Display the sensitive values in the console (DO NOT save them as env variables or outputs)
+          echo "User Name: $USER_NAME"
+          echo "Access Key ID: $ACCESS_KEY_ID"
+          echo "Access Key Secret: $ACCESS_KEY_SECRET"
 
       # Step 6: Use the values in a subsequent step (example)
       - name: Display User Information
@@ -75,3 +58,10 @@ jobs:
           echo "User Name: ${{ steps.apply.outputs.user_name }}"
           echo "Access Key ID: ${{ steps.apply.outputs.access_key_id }}"
           echo "Access Key Secret: ${{ steps.apply.outputs.access_key_secret }}"
+
+      # Optional: Step 7 for uploading credentials or additional tasks
+      # - name: Upload Credentials
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: credentials
+      #     path: path/to/credentials/file
