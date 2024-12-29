@@ -14,8 +14,7 @@ Este módulo realiza las siguientes acciones:
 
 1. **Terraform:** Debes tener instalado Terraform en tu máquina o entorno de CI/CD.
 2. **Cuenta AWS:** Este módulo necesita acceso a una cuenta AWS con permisos suficientes para crear usuarios, políticas y claves de acceso.
-3. **Acceso de OIDC para GitHub Actions (si usas CI/CD):** Debes configurar el acceso OIDC de AWS con GitHub para autenticarte sin necesidad de claves de acceso estáticas.
-   Aqui es el articulo donde se explica exactamente como podemos configurar el acceso OIDC de AWS con GitHub: https://mahendranp.medium.com/configure-github-openid-connect-oidc-provider-in-aws-b7af1bca97dd
+3. **Acceso de OIDC para GitHub Actions (si usas CI/CD):** Debes configurar el acceso OIDC de AWS con GitHub para autenticarte sin necesidad de claves de acceso estáticas. Aqui es el artículo donde se explica exactamente como podemos configurar el acceso OIDC de AWS con GitHub: [Configurar OIDC de AWS con GitHub](https://mahendranp.medium.com/configure-github-openid-connect-oidc-provider-in-aws-b7af1bca97dd).
 
 ## Estructura del Módulo
 
@@ -28,7 +27,7 @@ Este módulo está compuesto por varios archivos de Terraform para definir los r
     - `aws_iam_user` para crear el usuario IAM.
     - `aws_iam_user_policy` para la política inline.
     - `aws_iam_access_key` para crear las claves de acceso.
-
+  
 2. **`variables.tf`**: Contiene las variables que puedes modificar para personalizar el comportamiento del módulo, como el nombre del usuario, el ID de la cuenta de AWS, el nombre del rol y las direcciones IP.
 
 3. **`outputs.tf`**: Define las salidas del módulo, como el nombre de usuario, el ID de clave de acceso y el secreto de clave de acceso.
@@ -56,9 +55,9 @@ Puedes definir estas variables directamente en el archivo `variables.tfvars` o p
 
 El módulo generará las siguientes salidas:
 
-- **user_name**: El nombre del usuario IAM creado.
-- **access_key_id**: El ID de clave de acceso del usuario.
-- **access_key_secret**: El secreto de clave de acceso del usuario (marcado como sensitive).
+- **`user_name`**: El nombre del usuario IAM creado.
+- **`access_key_id`**: El ID de clave de acceso del usuario.
+- **`access_key_secret`**: El secreto de clave de acceso del usuario (marcado como sensitive).
 
 Estas salidas se almacenan en el archivo `user_info.txt`, que se puede usar como artefacto para acceder a la información.
 
@@ -68,15 +67,15 @@ Si estás usando GitHub Actions, este módulo incluye un archivo de flujo de tra
 
 ### Configuración de GitHub Actions:
 
-- Se configura el acceso a AWS utilizando OIDC.
-- Se ejecuta `terraform apply` y se captura la salida de las variables.
+1. Se configura el acceso a AWS utilizando OIDC.
+2. Se ejecuta `terraform apply` y se captura la salida de las variables.
 
 ### Subida de Artefactos:
 
 - La salida se guarda en el archivo `user_info.txt` y se sube como un artefacto en GitHub, donde se puede descargar por los usuarios autorizados.
 - El archivo de flujo de trabajo puede ser adaptado a tus necesidades específicas, incluyendo la personalización de la región y los roles.
 
-## Seguridad
+### Seguridad:
 
 - **Claves de acceso sensibles**: Los valores de `access_key_secret` se marcan como sensibles en Terraform para asegurar que no se impriman en los logs.
 - **Retención de artefactos**: Los artefactos generados (como el archivo `user_info.txt`) se almacenan con un tiempo de retención configurado en 1 día (ajustable).
@@ -84,3 +83,24 @@ Si estás usando GitHub Actions, este módulo incluye un archivo de flujo de tra
 ## Contribuciones
 
 Las contribuciones a este módulo son bienvenidas. Si deseas agregar características, arreglar errores o mejorar la documentación, por favor abre un pull request.
+
+## Modificaciones al Workflow
+
+### Ejecución Condicional en Pull Requests
+
+Este flujo de trabajo solo se ejecutará cuando haya un *pull request* hacia la rama `main`, y solo si el archivo `terraform.tfvars` ha cambiado. Si no hay cambios en ese archivo, el flujo de trabajo se detendrá automáticamente.
+
+### Workflow YAML
+
+El flujo de trabajo de GitHub Actions (`workflow.yml`) se modificó para realizar lo siguiente:
+
+1. **Eventos de disparo**: Se configuró para que se ejecute solo en *pull requests* dirigidos a la rama `main`, y específicamente si hay cambios en el archivo `terraform.tfvars`.
+2. **Comprobación de cambios**: Se añadió un paso para comprobar si el archivo `terraform.tfvars` ha cambiado en el *pull request*. Si no ha habido cambios, el flujo de trabajo se detiene con un código de salida 0, evitando la ejecución innecesaria.
+3. **Ejecución de Terraform**: Si se detectan cambios en el archivo `terraform.tfvars`, el flujo de trabajo continúa con la ejecución de Terraform, incluyendo la inicialización, aplicación del plan, captura de salidas y subida de artefactos.
+
+Este flujo de trabajo asegura que el módulo solo se ejecute cuando sea necesario y que no se realicen cambios innecesarios si no hay modificaciones en el archivo de configuración.
+
+---
+
+Este flujo de trabajo es ideal para proyectos que necesiten un control fino sobre cuándo y cómo se ejecutan los recursos de AWS, además de aprovechar las ventajas de integración continua (CI/CD) usando GitHub Actions.
+
