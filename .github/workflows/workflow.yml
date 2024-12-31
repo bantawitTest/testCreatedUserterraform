@@ -50,7 +50,7 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      # Step 5: Terraform Apply
+      # Step 6: Terraform Apply
       - name: Terraform Apply and Save Account Name to Environment Variable
         id: apply
         run: |
@@ -61,14 +61,24 @@ jobs:
           terraform output -json > tf_output.json
           cat tf_output.json  # Log all outputs for inspection
       
-          # Capture the user_name properly
-          USER_NAME=$(terraform output -raw user_name)  # This should capture only the user_name value
-          echo "USER_NAME=${USER_NAME}" >> $GITHUB_ENV
-          echo "Saved user name: ${USER_NAME}"  # Log the saved name
+          # Extract specific values from the JSON file using jq
+          USER_NAME=$(jq -r '.user_name.value' tf_output.json)
+          ACCESS_KEY_ID=$(jq -r '.access_key_id.value' tf_output.json)
+          ACCESS_KEY_SECRET=$(jq -r '.access_key_secret.value' tf_output.json)
       
-          # Confirm environment variable file content
-          echo "Environment variables after saving:"
-          cat $GITHUB_ENV
+          # Create the file and write the information to it
+          echo "buenos," > user_info.txt
+          echo "" >> user_info.txt
+          echo "aqui te dejo las info de el user creado:" >> user_info.txt
+          echo "access_key_id: ${ACCESS_KEY_ID}" >> user_info.txt
+          echo "access_key_secret: ${ACCESS_KEY_SECRET}" >> user_info.txt
+          echo "user_name: ${USER_NAME}" >> user_info.txt
+          echo "" >> user_info.txt
+          echo "Gracias" >> user_info.txt
+      
+          # Show the content of the file
+          echo "Content of user_info.txt:"
+          cat user_info.txt
 
 
 
