@@ -50,6 +50,7 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+      # Step 5: Terraform Apply
       - name: Terraform Apply and Save Account Name to Environment Variable
         id: apply
         run: |
@@ -60,14 +61,15 @@ jobs:
           terraform output -json > tf_output.json
           cat tf_output.json  # Log all outputs for inspection
       
-          # Capture the user_name properly, ensuring no extra characters
-          USER_NAME=$(terraform output -raw user_name | tr -d '\r' | tr -d '\n')  # Remove carriage return and newlines
+          # Capture the user_name properly
+          USER_NAME=$(terraform output -raw user_name)  # This should capture only the user_name value
           echo "USER_NAME=${USER_NAME}" >> $GITHUB_ENV
           echo "Saved user name: ${USER_NAME}"  # Log the saved name
       
           # Confirm environment variable file content
           echo "Environment variables after saving:"
           cat $GITHUB_ENV
+
 
 
       # Step 7: Upload the file as an artifact
