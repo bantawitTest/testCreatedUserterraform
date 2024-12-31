@@ -67,10 +67,9 @@ jobs:
           echo "Saved user name: ${USER_NAME}"  # Log the saved name
 
           # Confirm environment variable file content
+          echo "Environment variables after saving:"
           cat $GITHUB_ENV
 
-
-          
       # Step 7: Upload the file as an artifact
       - name: Upload User Info as Artifact
         uses: actions/upload-artifact@v3
