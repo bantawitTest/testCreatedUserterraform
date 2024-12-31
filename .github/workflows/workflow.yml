@@ -36,7 +36,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: '1.5.0'  # Cambiar a la versión de Terraform que necesitas
+          terraform_version: '1.5.0'  # Change to the version of Terraform you need
 
       # Step 4: Set up AWS OIDC credentials (Assuming AWS OIDC is configured with GitHub)
       - name: Set up AWS OIDC credentials
@@ -50,36 +50,29 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      # Step 6: Terraform Apply and Save Account Name to Environment Variable
-      - name: Terraform Apply and Save Account Name
+      # Step 6: Terraform Apply and Capture Output
+      - name: Terraform Apply
         id: apply
         run: |
-          set -x  # Habilitar depuración en shell
           terraform apply -auto-approve
-
-          # Obtener valores específicos de Terraform
+          echo "::notice title=Terraform Apply Completed::Successfully applied Terraform changes"
+          
+          # Capture the Terraform output values and store them in environment variables
           USER_NAME=$(terraform output -raw user_name)
           ACCESS_KEY_ID=$(terraform output -raw access_key_id)
           ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)
-
-          # Guardar valores en variables de entorno
-          echo "USER_NAME=${USER_NAME}" >> $GITHUB_ENV
-          echo "ACCESS_KEY_ID=${ACCESS_KEY_ID}" >> $GITHUB_ENV
-          echo "ACCESS_KEY_SECRET=${ACCESS_KEY_SECRET}" >> $GITHUB_ENV
-
-          # Crear archivo de texto con la información
-          echo "buenos," > user_info.txt
+          
+          # Crear el archivo con los valores extraídos
+          echo "Buenas tardes," > user_info.txt
           echo "" >> user_info.txt
-          echo "aqui te dejo las info de el user creado:" >> user_info.txt
-          echo "access_key_id: ${ACCESS_KEY_ID}" >> user_info.txt
-          echo "access_key_secret: ${ACCESS_KEY_SECRET}" >> user_info.txt
-          echo "user_name: ${USER_NAME}" >> user_info.txt
+          echo "Se ha creado el usuario con los siguientes datos:" >> user_info.txt
+          echo "User name: $USER_NAME" >> user_info.txt
+          echo "Access key id: $ACCESS_KEY_ID" >> user_info.txt
+          echo "Access secret key: $ACCESS_KEY_SECRET" >> user_info.txt
           echo "" >> user_info.txt
-          echo "Gracias" >> user_info.txt
-
-          # Mostrar el contenido del archivo
-          echo "Content of user_info.txt:"
-          cat user_info.txt
+          echo "Recordad que hay que pegar esta clave en el campo seguro." >> user_info.txt
+          echo "" >> user_info.txt
+          echo "Un saludo." >> user_info.txt
 
       # Step 7: Upload the file as an artifact
       - name: Upload User Info as Artifact
@@ -88,3 +81,4 @@ jobs:
           name: user-info
           path: user_info.txt
           retention-days: 1
+
