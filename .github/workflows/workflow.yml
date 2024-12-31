@@ -54,13 +54,21 @@ jobs:
       - name: Terraform Apply and Save Account Name
         id: apply
         run: |
+          set -x  # Enable shell debugging
           terraform apply -auto-approve
 
-          # Save only the user name in the environment variable
-          echo "USER_NAME=$(terraform output -raw user_name | tr -d '\r')" >> $GITHUB_ENV
+          # Log Terraform outputs for debugging
+          terraform output -json > tf_output.json
+          cat tf_output.json  # Log all outputs for inspection
 
-          # Log confirmation (optional)
-          echo "::notice title=Terraform Outputs Set::User name saved as an environment variable."
+          # Save only the user name in the environment variable
+          USER_NAME=$(terraform output -raw user_name | tr -d '\r')
+          echo "USER_NAME=${USER_NAME}" >> $GITHUB_ENV
+          echo "Saved user name: ${USER_NAME}"  # Log the saved name
+
+          # Confirm environment variable file content
+          cat $GITHUB_ENV
+
 
           
       # Step 7: Upload the file as an artifact
