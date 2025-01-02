@@ -39,19 +39,32 @@ jobs:
           terraform_version: '1.5.0'  # Cambia a la versión de Terraform que necesitas
           terraform_wrapper: false  # Deshabilita el script envoltorio
 
-      # Paso 4: Configurar las credenciales de AWS OIDC (suponiendo que AWS OIDC esté configurado con GitHub)
+      # Paso 4: Extraer aws_account_id de Terraform
+      - name: Get AWS Account ID from Terraform
+        run: |
+          # Inicializar Terraform para asegurarse de que la configuración esté lista
+          terraform init
+          
+          # Extraer el AWS Account ID desde el output de Terraform
+          AWS_ACCOUNT_ID=$(terraform output -raw aws_account_id)
+          
+          # Exportar la variable para usarla en los siguientes pasos
+          echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> $GITHUB_ENV
+
+      # Paso 5: Configurar las credenciales de AWS OIDC
       - name: Set up AWS OIDC credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::$account_id:role/GitHubActionsRole
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
           aws-region: us-east-1
           role-session-name: GitHubActions
+          audience: sts.amazonaws.com
 
-      # Paso 5: Inicializar Terraform
+      # Paso 6: Inicializar Terraform
       - name: Terraform Init
         run: terraform init
 
-      # Paso 6: Aplicar Terraform y capturar las salidas
+      # Paso 7: Aplicar Terraform y capturar las salidas
       - name: Terraform Apply
         id: apply
         run: |
@@ -63,7 +76,7 @@ jobs:
           echo "ACCESS_KEY_ID=$(terraform output -raw access_key_id)" >> $GITHUB_ENV
           echo "ACCESS_KEY_SECRET=$(terraform output -raw access_key_secret)" >> $GITHUB_ENV
 
-      # Paso 7: Crear el archivo con la información del usuario
+      # Paso 8: Crear el archivo con la información del usuario
       - name: Create User Info File
         run: |
           echo "Buenas tardes," > user_info.txt
@@ -77,7 +90,7 @@ jobs:
           echo "" >> user_info.txt
           echo "Un saludo." >> user_info.txt
 
-      # Paso 8: Subir el archivo como un artefacto
+      # Paso 9: Subir el archivo como un artefacto
       - name: Upload User Info as Artifact
         uses: actions/upload-artifact@v3
         with:
