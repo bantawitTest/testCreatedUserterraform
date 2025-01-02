@@ -36,29 +36,27 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: '1.5.0'  # Cambia a la versión de Terraform que necesitas
-          terraform_wrapper: false  # Deshabilita el script envoltorio
+          terraform_version: '1.5.0'
 
-      # Paso 4: Extraer aws_account_id de Terraform
-      - name: Get AWS Account ID from Terraform
+      # Paso 4: Extraer account_id desde Terraform variables
+      - name: Extract AWS Account ID
         run: |
-          # Inicializar Terraform para asegurarse de que la configuración esté lista
+          # Inicializar Terraform
           terraform init
           
-          # Extraer el AWS Account ID desde el output de Terraform
-          AWS_ACCOUNT_ID=$(terraform output -raw aws_account_id)
+          # Ejecutar Terraform console para obtener account_id
+          ACCOUNT_ID=$(terraform console <<< 'var.account_id')
           
           # Exportar la variable para usarla en los siguientes pasos
-          echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> $GITHUB_ENV
+          echo "ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
 
       # Paso 5: Configurar las credenciales de AWS OIDC
       - name: Set up AWS OIDC credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/GitHubActionsRole
           aws-region: us-east-1
           role-session-name: GitHubActions
-          audience: sts.amazonaws.com
 
       # Paso 6: Inicializar Terraform
       - name: Terraform Init
@@ -97,3 +95,4 @@ jobs:
           name: user-info
           path: user_info.txt
           retention-days: 1
+
