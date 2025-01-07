@@ -1,0 +1,31 @@
+name: CodeQL Analysis
+
+on:
+  pull_request:
+    branches:
+      - main  # Ejecutar solo si el pull request apunta a la rama main
+
+jobs:
+  codeql-analysis:
+    name: Run CodeQL Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Checkout del código
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Paso 2: Configurar CodeQL
+      - name: Set up CodeQL
+        uses: github/codeql-action/setup@v2
+
+      # Paso 3: Ejecutar el análisis de CodeQL
+      - name: Run CodeQL analysis
+        uses: github/codeql-action/analyze@v2
+
+      # Paso 4: Subir resultados como artefacto
+      - name: Upload CodeQL Results as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: codeql-results
+          path: codeql-results
