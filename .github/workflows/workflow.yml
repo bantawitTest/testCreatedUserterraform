@@ -46,6 +46,8 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: '1.5.0'
+          terraform_wrapper: false  # Deshabilita el script envoltorio
+
 
       # Paso 5: Extraer el Account ID desde terraform.tfvars
       - name: Extract AWS Account ID
