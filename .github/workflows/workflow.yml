@@ -1,4 +1,3 @@
-
 name: Terraform Plan and Apply
 
 on:
@@ -8,14 +7,11 @@ on:
     paths:
       - terraform.tfvars  # Ejecutar solo si hay cambios en terraform.tfvars
 
-permissions:
-  id-token: write
-  contents: read  # Necesario para acciones que leen el contenido del repositorio
-
 jobs:
   terraform:
     name: Terraform Plan and Apply
     runs-on: ubuntu-latest
+    needs: codeql-analysis  # Asegura que CodeQL se complete antes de Terraform
 
     steps:
       # Paso 1: Checkout del código
@@ -35,7 +31,6 @@ jobs:
             echo "continue=true" >> $GITHUB_ENV
           fi
 
-
       # Paso 3: Continuar solo si hay cambios en terraform.tfvars
       - name: Exit if no changes in terraform.tfvars
         if: env.continue == 'false'
@@ -46,8 +41,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: '1.5.0'
-          terraform_wrapper: false  # Deshabilita el script envoltorio
-
+          terraform_wrapper: false
 
       # Paso 5: Extraer el Account ID desde terraform.tfvars
       - name: Extract AWS Account ID
@@ -103,4 +97,3 @@ jobs:
           name: user-info
           path: user_info.txt
           retention-days: 1
-
