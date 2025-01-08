@@ -2,8 +2,6 @@ name: Terraform Plan and Apply
 
 on:
   pull_request:
-    branches:
-      - main  # Ejecutar solo si el pull request apunta a la rama main
     paths:
       - terraform.tfvars  # Ejecutar solo si hay cambios en terraform.tfvars
 
